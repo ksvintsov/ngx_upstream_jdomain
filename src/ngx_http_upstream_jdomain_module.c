@@ -24,6 +24,8 @@
 #define NGX_JDOMAIN_ARG_STR_PORT "port="
 #define NGX_JDOMAIN_ARG_STR_IPVER "ipver="
 #define NGX_JDOMAIN_ARG_STR_MAX_CONNS "max_conns="
+#define NGX_JDOMAIN_ARG_STR_MAX_FAILS "max_fails="
+#define NGX_JDOMAIN_ARG_STR_FAIL_TIMEOUT "fail_timeout="
 #define NGX_JDOMAIN_ARG_STR_STRICT "strict"
 
 typedef struct
@@ -608,6 +610,25 @@ ngx_http_upstream_jdomain(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 		if (ngx_strncmp(value[i].data, NGX_JDOMAIN_ARG_STR_MAX_CONNS, arglen) == 0) {
 			num = ngx_atoi(value[i].data + arglen, value[i].len - arglen);
 			server->max_conns = num;
+
+			continue;
+		}
+
+		arglen = ngx_strlen(NGX_JDOMAIN_ARG_STR_MAX_FAILS);
+		if (ngx_strncmp(value[i].data, NGX_JDOMAIN_ARG_STR_MAX_FAILS, arglen) == 0) {
+			num = ngx_atoi(value[i].data + arglen, value[i].len - arglen);
+			server->max_fails = num;
+
+			continue;
+		}
+		arglen = ngx_strlen(NGX_JDOMAIN_ARG_STR_FAIL_TIMEOUT);
+		if (ngx_strncmp(value[i].data, NGX_JDOMAIN_ARG_STR_FAIL_TIMEOUT, arglen) == 0) {
+			s.len = value[i].len - arglen;
+			s.data = &value[i].data[arglen];
+			server->fail_timeout = ngx_parse_time(&s, 1);
+			if (server->fail_timeout < 1) {
+				goto invalid;
+			}
 
 			continue;
 		}
